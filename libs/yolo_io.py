@@ -80,22 +80,23 @@ class YOLOWriter:
 
 class YoloReader:
 
-    def __init__(self, file_path, image, class_list_path=None):
+    def __init__(self, file_path, image, class_list_path=None, class_list=None):
         # shapes type:
         # [labbel, [(x1,y1), (x2,y2), (x3,y3), (x4,y4)], color, color, difficult]
         self.shapes = []
         self.file_path = file_path
 
-        if class_list_path is None:
-            dir_path = os.path.dirname(os.path.realpath(self.file_path))
-            self.class_list_path = os.path.join(dir_path, "classes.txt")
+        if class_list is None:
+            if class_list_path is None:
+                dir_path = os.path.dirname(os.path.realpath(self.file_path))
+                self.class_list_path = os.path.join(dir_path, "classes.txt")
+            else:
+                self.class_list_path = class_list_path
+
+            classes_file = open(self.class_list_path, 'r')
+            self.classes = classes_file.read().strip('\n').split('\n')
         else:
-            self.class_list_path = class_list_path
-
-        # print (file_path, self.class_list_path)
-
-        classes_file = open(self.class_list_path, 'r')
-        self.classes = classes_file.read().strip('\n').split('\n')
+            self.classes = class_list
 
         # print (self.classes)
 
