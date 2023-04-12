@@ -137,8 +137,16 @@ class YoloReader:
     def parse_yolo_format(self):
         bnd_box_file = open(self.file_path, 'r')
         for bndBox in bnd_box_file:
-            class_index, x_center, y_center, w, h = bndBox.strip().split(' ')
+            difficult_flag = False
+            split = bndBox.strip().split(' ')
+            if len(split) == 5:
+                class_index, x_center, y_center, w, h = split
+            elif len(split) == 6:
+                class_index, x_center, y_center, w, h, difficult_flag = split
+                difficult_flag = bool(int(difficult_flag))
+            else:
+                raise RuntimeError(f"Unexpected label line: {bndBox}")
             label, x_min, y_min, x_max, y_max = self.yolo_line_to_shape(class_index, x_center, y_center, w, h)
 
             # Caveat: difficult flag is discarded when saved as yolo format.
-            self.add_shape(label, x_min, y_min, x_max, y_max, False)
+            self.add_shape(label, x_min, y_min, x_max, y_max, difficult_flag)

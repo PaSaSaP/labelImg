@@ -1643,7 +1643,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.set_format(FORMAT_YOLO)
         t_yolo_parse_reader = YoloReader(txt_path, self.image, class_list=self.label_hist)
         shapes = t_yolo_parse_reader.get_shapes()
-        print(shapes)
+        print(f"YOLO shapes: {shapes}")
         self.load_labels(shapes)
         self.canvas.verified = t_yolo_parse_reader.verified
 
