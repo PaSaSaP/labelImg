@@ -431,6 +431,12 @@ class MainWindow(QMainWindow, WindowMixin):
         self.display_label_option.setChecked(settings.get(SETTING_PAINT_LABEL, False))
         self.display_label_option.triggered.connect(self.toggle_paint_labels_option)
 
+        self.view_only_selected_action = QAction(get_str('viewOnlySelected'), self)
+        self.view_only_selected_action.setShortcut("T")
+        self.view_only_selected_action.setCheckable(True)
+        self.view_only_selected_action.setChecked(False)
+        self.view_only_selected_action.triggered.connect(self.toggle_view_only_selected_action)
+
         add_actions(self.menus.file,
                     (open, open_dir, change_save_dir, open_annotation, copy_prev_bounding, self.menus.recentFiles, save, save_format, save_as, close, reset_all, delete_image, quit))
         add_actions(self.menus.help, (help_default, show_info, show_shortcut))
@@ -438,6 +444,7 @@ class MainWindow(QMainWindow, WindowMixin):
             self.auto_saving,
             self.single_class_mode,
             self.display_label_option,
+            self.view_only_selected_action,
             labels, advanced_mode, None,
             hide_one, hide_all, show_all, None,
             zoom_in, zoom_out, zoom_org, None,
@@ -1100,6 +1107,8 @@ class MainWindow(QMainWindow, WindowMixin):
         else:
             items = self.items_to_shapes.items()
         for item, shape in items:
+            if item is None:
+                continue
             item.setCheckState(Qt.Checked if value else Qt.Unchecked)
 
     def load_file(self, file_path=None):
@@ -1677,6 +1686,10 @@ class MainWindow(QMainWindow, WindowMixin):
     def toggle_paint_labels_option(self):
         for shape in self.canvas.shapes:
             shape.paint_label = self.display_label_option.isChecked()
+
+    def toggle_view_only_selected_action(self):
+        if not self.canvas.set_permament_hiding(self.view_only_selected_action.isChecked()) and self.view_only_selected_action.isChecked():
+            self.view_only_selected_action.setChecked(False)
 
     def toggle_draw_square(self):
         self.canvas.set_drawing_shape_to_square(self.draw_squares_option.isChecked())

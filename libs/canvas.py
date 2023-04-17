@@ -276,7 +276,8 @@ class Canvas(QWidget):
         self.update()
 
     def mouseReleaseEvent(self, ev):
-        if ev.button() == Qt.RightButton:
+        ev_button = ev.button()
+        if ev_button == Qt.RightButton:
             menu = self.menus[bool(self.selected_shape_copy)]
             self.restore_cursor()
             if not menu.exec_(self.mapToGlobal(ev.pos()))\
@@ -284,18 +285,23 @@ class Canvas(QWidget):
                 # Cancel the move by deleting the shadow copy.
                 self.selected_shape_copy = None
                 self.repaint()
-        elif ev.button() == Qt.LeftButton and self.selected_shape:
+        elif ev_button == Qt.LeftButton and self.selected_shape:
             if self.selected_vertex():
                 self.override_cursor(CURSOR_POINT)
             else:
                 self.override_cursor(CURSOR_GRAB)
-        elif ev.button() == Qt.LeftButton:
+        elif ev_button == Qt.LeftButton:
             pos = self.transform_pos(ev.pos())
             if self.drawing():
                 self.handle_drawing(pos)
             else:
                 # pan
                 QApplication.restoreOverrideCursor()
+        elif ev_button == Qt.MiddleButton and self.selected_shape:
+            # TODO untick also in right menu
+            self.set_shape_visible(self.selected_shape, not self.isVisible(self.selected_shape))
+            # self.de_select_shape()
+
 
     def end_move(self, copy=False):
         assert self.selected_shape and self.selected_shape_copy
@@ -318,6 +324,20 @@ class Canvas(QWidget):
             # Otherwise the user will not be able to select a shape.
             self.set_hiding(True)
             self.repaint()
+
+    def set_permament_hiding(self, value):
+        if not self.selected_shape:
+            self.hide_background = False
+            self.repaint()
+            return False
+        if value:
+            self.hide_background = True
+            self.repaint()
+        else:
+            self.hide_background = False
+            self.repaint()
+        return True
+
 
     def handle_drawing(self, pos):
         if self.current and self.current.reach_max_points() is False:
