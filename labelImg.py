@@ -289,6 +289,9 @@ class MainWindow(QMainWindow, WindowMixin):
                                'Ctrl+Shift+A', 'expert', get_str('advancedModeDetail'),
                                checkable=True)
 
+        hide_one = action(get_str('hideOneBox'), partial(self.toggle_polygons, False, True),
+                          'H', 'hide', get_str('hideAllBoxDetail'),
+                          enabled=False)
         hide_all = action(get_str('hideAllBox'), partial(self.toggle_polygons, False),
                           'Ctrl+H', 'hide', get_str('hideAllBoxDetail'),
                           enabled=False)
@@ -401,7 +404,7 @@ class MainWindow(QMainWindow, WindowMixin):
                                                delete, shape_line_color, shape_fill_color),
                               onLoadActive=(
                                   close, create, create_mode, edit_mode),
-                              onShapesPresent=(save_as, hide_all, show_all))
+                              onShapesPresent=(save_as, hide_one, hide_all, show_all))
 
         self.menus = Struct(
             file=self.menu(get_str('menu_file')),
@@ -436,7 +439,7 @@ class MainWindow(QMainWindow, WindowMixin):
             self.single_class_mode,
             self.display_label_option,
             labels, advanced_mode, None,
-            hide_all, show_all, None,
+            hide_one, hide_all, show_all, None,
             zoom_in, zoom_out, zoom_org, None,
             fit_window, fit_width, None,
             light_brighten, light_darken, light_org))
@@ -458,7 +461,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.advanced = (
             open, open_dir, change_save_dir, open_next_image, open_prev_image, save, save_format, None,
             create_mode, edit_mode, None,
-            hide_all, show_all)
+            hide_one, hide_all, show_all)
 
         self.statusBar().showMessage('%s started.' % __appname__)
         self.statusBar().show()
@@ -1091,8 +1094,12 @@ class MainWindow(QMainWindow, WindowMixin):
     def add_light(self, increment=10):
         self.set_light(self.light_widget.value() + increment)
 
-    def toggle_polygons(self, value):
-        for item, shape in self.items_to_shapes.items():
+    def toggle_polygons(self, value, just_one=False):
+        if just_one:
+            items = [(self.current_item(), None)]
+        else:
+            items = self.items_to_shapes.items()
+        for item, shape in items:
             item.setCheckState(Qt.Checked if value else Qt.Unchecked)
 
     def load_file(self, file_path=None):
